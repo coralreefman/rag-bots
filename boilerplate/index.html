@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+</head>
+<body>
+    <h1>Chatbot Boilerplate</h1>
+    <div>
+        <label for="message">Message:</label>
+        <input type="text" id="message" placeholder="Type your message here...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="chatbox" style="margin-top: 20px; max-width: 600px; font-family: Arial, sans-serif;">
+        <h3>Chat:</h3>
+    </div>
+
+    <script>
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsHost = window.location.host; // Includes hostname and port (e.g., "example.com:8000")
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/`;
+
+        const websocket = new WebSocket(wsUrl);
+
+        websocket.onopen = () => {
+            console.log("WebSocket connection established.");
+        };
+
+        websocket.onmessage = (event) => {
+            console.log("Message from server:", event.data);
+        };
+
+        websocket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        websocket.onclose = () => {
+            console.log("WebSocket connection closed.");
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message");
+            const userMessage = messageInput.value;
+            if (userMessage) {
+                websocket.send(userMessage);
+                addMessage("You", userMessage);
+                messageInput.value = ""; // Clear the input field
+            }
+        }
+
+        function addMessage(sender, message) {
+            const messageElement = document.createElement("p");
+            messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatbox.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>
