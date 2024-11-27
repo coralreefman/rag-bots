@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOME0001 Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .chat-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      max-width: 500px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .chat-input {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .button {
+      padding: 10px;
+      background-color: #656565;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #3b3b3b;
+    }
+    .message {
+      margin: 5px 0;
+    }
+    .message.user {
+      text-align: right;
+      color: red;
+    }
+    .message.assistant {
+      text-align: left;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+<h1>HOME0001 Assistant</h1>
+
+<div class="chat-box" id="chatBox">
+  <!-- Chat messages will appear here -->
+</div>
+
+<input type="text" id="queryInput" class="chat-input" placeholder="Type your message here..." />
+<button id="sendButton" class="button">Send</button>
+<button id="connectWebSocket" class="button">Connect WebSocket</button>
+
+<script>
+  const sendButton = document.getElementById("sendButton");
+  const queryInput = document.getElementById("queryInput");
+  const chatBox = document.getElementById("chatBox");
+
+  // REST API Interaction
+  sendButton.addEventListener("click", sendMessage);
+  queryInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      sendMessage();
+      event.preventDefault(); // Prevent form submission or default behavior
+    }
+  });
+
+  async function sendMessage() {
+    const query = queryInput.value;
+    if (!query) return;
+
+    // Display user's message
+    addMessage("user", query);
+
+    try {
+      const response = await fetch(`${window.location.origin}/chat/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const data = await response.json();
+      addMessage("assistant", data.response || "Error: No response");
+    } catch (error) {
+      addMessage("assistant", `Error: ${error.message}`);
+    }
+
+    queryInput.value = ""; // Clear input
+  }
+
+  // WebSocket Interaction
+  const connectWebSocket = document.getElementById("connectWebSocket");
+  let ws;
+
+  connectWebSocket.addEventListener("click", () => {
+    if (ws) ws.close(); // Close existing WebSocket if reconnecting
+
+    ws = new WebSocket(`${window.location.origin.replace('http', 'ws')}/ws/`);
+
+    ws.onopen = () => {
+      addMessage("assistant", "WebSocket connected! Start chatting.");
+    };
+
+    ws.onmessage = (event) => {
+      addMessage("assistant", event.data);
+    };
+
+    ws.onerror = (error) => {
+      addMessage("assistant", `WebSocket error: ${error}`);
+    };
+
+    ws.onclose = () => {
+      addMessage("assistant", "WebSocket disconnected.");
+    };
+  });
+
+  // Helper function to add messages to the chat box
+  function addMessage(role, text) {
+    const message = document.createElement("div");
+    message.className = `message ${role}`;
+    message.textContent = text;
+    chatBox.appendChild(message);
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
+  }
+</script>
+
+</body>
+</html>
