@@ -76,7 +76,6 @@ def basic_retriever(documents, embeddings):
 
     vectorstore = Chroma.from_documents(documents, embeddings)
 
-    # Will be replaced in a bit
     retriever = vectorstore.as_retriever()
 
     return retriever
