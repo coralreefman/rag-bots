@@ -1,7 +1,6 @@
 from fastapi import FastAPI, WebSocket,  WebSocketDisconnect
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from openai import OpenAI
 
 import json
 
@@ -12,6 +11,7 @@ from langchain.schema import Document
 
 from langchain_ollama import ChatOllama
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -58,17 +58,28 @@ class ModelConfig:
     
     _EMBEDDINGS = {
         "openai-default": {
-            "name": "OpenAI Embeddings",
+            "name": "text-embedding-3-large",
             "provider": "OpenAI",
             "description": "Default OpenAI embedding model",
             "instance": OpenAIEmbeddings()
         },
         "hf-mpnet": {
-            "name": "MPNet",
-            "provider": "Hugging Face",
-            "description": "all-mpnet-base-v2 model",
+            "name": "all-mpnet-base-v2 ",
+            "provider": "HuggingFace",
+            "description": "small model for testing",
             "instance": HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+        },
+        "bge-small": {
+            "name": "bge-small-en",
+            "provider": "HuggingFace",
+            "description": "small model for testing",
+            "instance": HuggingFaceBgeEmbeddings(
+                model_name="BAAI/bge-small-en",
+                model_kwargs={"device": "cuda"},
+                encode_kwargs={"normalize_embeddings": True}
+            )
         }
+
     }
 
     @classmethod
