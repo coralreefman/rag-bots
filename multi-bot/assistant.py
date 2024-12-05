@@ -12,6 +12,9 @@ from langchain.schema import Document
 from langchain_ollama import ChatOllama
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_nomic.embeddings import NomicEmbeddings
+
+from langchain_anthropic import ChatAnthropic
 
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -30,6 +33,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from dotenv import load_dotenv
+import os
+
+# Load the .env file
+load_dotenv()
+
 ### Statefully manage chat history ###
 class State(TypedDict):
     input: str
@@ -44,15 +53,33 @@ class ModelConfig:
     _MODELS = {
         "openai-gpt-4o": {
             "name": "gpt-4o",
-            "provider": "OpenAI",
+            "provider": "OpenAI API",
             "description": "Most capable OpenAI model",
             "instance": ChatOpenAI(model="gpt-4o")
         },
-        "ollama-llama3.1": {
+        "llama3.1": {
             "name": "Llama 3.1",
             "provider": "Ollama",
             "description": "Local Llama 3.1 model via Ollama",
             "instance": ChatOllama(model="llama3.1")
+        },
+        "llama3.2-3b": {
+            "name": "llama3.2:3b-instruct-fp16",
+            "provider": "Ollama",
+            "description": "Local Llama 3.2 model via Ollama",
+            "instance": ChatOllama(model="llama3.2:3b-instruct-fp16")
+        },
+        "nemo-12b-q8": {
+            "name": "mistral-nemo:12b-instruct-2407-q8_0",
+            "provider": "Ollama",
+            "description": "Local Mistral Nemo model via Ollama",
+            "instance": ChatOllama(model="mistral-nemo:12b-instruct-2407-q8_0")
+        },
+        "claude-3-opus": {
+            "name": "claude-3-opus-20240229",
+            "provider": "Anthropic API",
+            "description": "Most capable Anthropic model",
+            "instance": ChatAnthropic(model='claude-3-opus-20240229')
         }
     }
     
@@ -78,7 +105,17 @@ class ModelConfig:
                 model_kwargs={"device": "cuda"},
                 encode_kwargs={"normalize_embeddings": True}
             )
+        },
+        "nomic-1.5": {
+            "name": "/nomic-embed-text-v1.5",
+            "provider": "HuggingFace",
+            "description": "decent model",
+            "instance": NomicEmbeddings(
+                model='nomic-embed-text-v1.5', 
+                inference_mode='local'
+            )
         }
+
 
     }
 
