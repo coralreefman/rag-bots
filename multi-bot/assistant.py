@@ -57,14 +57,14 @@ class ModelConfig:
             "description": "Most capable OpenAI model",
             "instance": ChatOpenAI(model="gpt-4o")
         },
-        "llama3.1": {
-            "name": "Llama 3.1",
+        "llama3.3": {
+            "name": "llama3.3:70b",
             "provider": "Ollama",
-            "description": "Local Llama 3.1 model via Ollama",
-            "instance": ChatOllama(model="llama3.1")
+            "description": "Local Llama 3.3 model via Ollama",
+            "instance": ChatOllama(model="llama3.3:70b-instruct-q8_0")
         },
         "llama3.2-3b": {
-            "name": "llama3.2:3b-instruct-fp16",
+            "name": "llama3.2:3b",
             "provider": "Ollama",
             "description": "Local Llama 3.2 model via Ollama",
             "instance": ChatOllama(model="llama3.2:3b-instruct-fp16")
@@ -107,7 +107,7 @@ class ModelConfig:
             )
         },
         "nomic-1.5": {
-            "name": "/nomic-embed-text-v1.5",
+            "name": "nomic-embed-text-v1.5",
             "provider": "HuggingFace",
             "description": "decent model",
             "instance": NomicEmbeddings(
@@ -115,7 +115,6 @@ class ModelConfig:
                 inference_mode='local'
             )
         }
-
 
     }
 
@@ -158,6 +157,7 @@ class ModelConfig:
         }
         
 class ChatBot:
+
     def __init__(self, llm_id="openai-gpt-4o", embedding_id="openai-default"):
         """Initialize chatbot with specified models"""
         self.llm = ModelConfig.get_llm(llm_id)
@@ -166,18 +166,6 @@ class ChatBot:
         self.current_embedding_id = embedding_id
         self.active_connections = {}
         self.setup_prompts()
-    
-    def _get_llm(self, model_id):
-        """Get LLM instance from config"""
-        if model_id not in ModelConfig.LLM_CONFIGS:
-            raise ValueError(f"Unknown LLM: {model_id}")
-        return ModelConfig.LLM_CONFIGS[model_id]["create"]()
-    
-    def _get_embeddings(self, embedding_id):
-        """Get embeddings instance from config"""
-        if embedding_id not in ModelConfig.EMBEDDING_CONFIGS:
-            raise ValueError(f"Unknown embeddings: {embedding_id}")
-        return ModelConfig.EMBEDDING_CONFIGS[embedding_id]["create"]()
     
     def load_documents(self, file_path):
         """Load QA documents"""
@@ -189,7 +177,7 @@ class ChatBot:
     def setup_prompts(self):
         """Setup chat prompts"""
         self.qa_prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, say that you don't know. Use three sentences maximum and keep the answer concise.\n\n{context}"),
+            ("system", "Your name is Talin. You're part of the HOME0001 team. You are an expert customer service rep for the housing collective HOME0001. Your goal is to help customers who are looking to buy a home at one of our locations. Use the following pieces of retrieved context to answer any question. If you don't find an answer just admit that you don't know. Only answer questions related to HOME0001. Talk in a pragmatic tone. don't get cute, keep it professional but avoid marketing or corporate speak at all costs. Talk like you're texting. Use three sentences maximum and keep the answer concise. Do not admit that you're a bot and do not give it away. Always act human. Talk about HOME0001 as 'us' and 'we'. \n\n{context}"),
             MessagesPlaceholder("chat_history"),
             ("human", "{input}"),
         ])
@@ -200,16 +188,31 @@ class ChatBot:
             ("human", "{input}"),
         ])
 
-    def initialize_rag_chain(self, document_path):
-        """Initialize RAG chain"""
- 
-        documents = self.load_documents(document_path)
-        vectorstore = FAISS.from_documents(
-            documents, 
-            self.embeddings,
-            # persist_directory=chroma_db_path
-        )
-        retriever = vectorstore.as_retriever()
+    def setup_vector_db(self, document_path):
+
+        if os.path.isfile(f"./FAISS/{self.current_embedding_id}.faiss"):
+            
+            self.vectorstore = FAISS.load_local(
+                folder_path="./FAISS",
+                embeddings=self.embeddings,
+                index_name=self.current_embedding_id,
+                allow_dangerous_deserialization=True
+            )
+
+        else:
+
+            documents = self.load_documents(document_path)
+
+            self.vectorstore = FAISS.from_documents(
+                documents, 
+                self.embeddings
+            )
+            self.vectorstore.save_local("./FAISS", self.current_embedding_id)                  
+        
+    def initialize_rag_chain(self):
+        """Initialize RAG chain""" 
+        
+        retriever = self.vectorstore.as_retriever()
         
         history_aware_retriever = create_history_aware_retriever(
             self.llm, retriever, self.context_prompt
@@ -230,6 +233,9 @@ class ChatBot:
     
     def initialize_app(self):
 
+        # TO DO: add document grade to check for retrieved doc relevance AND 
+        # add case for when no doc is relevant
+        
         self.workflow = StateGraph(state_schema=State)
         self.workflow.add_edge(START, "model")
         self.workflow.add_node("model", self.call_model)
@@ -252,7 +258,8 @@ class ChatBot:
 # Initialize FastAPI and first instance of Chatbot
 app = FastAPI()
 bot = ChatBot()
-bot.initialize_rag_chain("../data/home0001qa.json")
+bot.setup_vector_db("../data/home0001qa.json")
+bot.initialize_rag_chain()
 bot.initialize_app()
 
 # API Models
@@ -283,7 +290,8 @@ async def update_config(config: ConfigRequest):
     try:
         # Create new bot instance with requested models
         bot = ChatBot(config.llm, config.embeddings)
-        bot.initialize_rag_chain("../data/home0001qa.json")
+        bot.setup_vector_db("../data/home0001qa.json")
+        bot.initialize_rag_chain()
         bot.initialize_app()
         return {
             "status": "success",
