@@ -29,7 +29,7 @@ from langgraph.graph.message import add_messages
 from typing import Sequence
 from typing_extensions import Annotated, TypedDict
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -270,6 +270,15 @@ class ConfigRequest(BaseModel):
     llm: str
     embeddings: str
 
+@app.post("/chat")
+async def chat_endpoint(request: ChatRequest):
+    try:
+        config =  {"configurable": {"thread_id": "test-id"}}
+        response = await bot.get_response(request.message, config=config)
+        return {"answer": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.get("/config/options")
 async def get_config_options():
     """Get available model options for frontend"""

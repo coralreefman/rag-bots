@@ -158,15 +158,14 @@ Built in 1900 as a haberdashery and factory warehouse for Rubenstein & Lipton, t
 
 BUILDING:
 
-Community dinners & events
-Roofdeck
-Bike room
-Laundry room
-Package room
-Large elevator
-Wheelchair access
+Community dinners & events.
+Roofdeck.
+Bike room.
+Laundry room.
+Package room.
+Large elevator.
+Wheelchair access.
 SUBWAY:
-
 Grand: B, D (3 minute walk)
 Delancey / Essex: F, M, J (6 minute walk)
 Bowery: J, Z (8 minute walk)
@@ -175,9 +174,7 @@ Canal: 4, 6 (14 minute walk)
 Overview:
 
 Elevator building with roof terrace.
-
 Units fully furnished and equipped with all the essentials.
-
 Artworks by internationally significant artists.
 
 #### Studio
@@ -212,7 +209,7 @@ Fully equipped with everything you need, ready from day one, including contribut
 
 #### Studio Max
 
-from $625,000
+From $625,000
 
 Approx 435 sq ft
 
@@ -241,6 +238,10 @@ Hi-speed WiFi.
 Fully equipped with everything you need, ready from day one, including contributions from leading designers such as New Tendency and Moroso, with ceramics by Hasami, bedding by Tekla, lighting by Flos, and audio equipment by Teenage Engineering.
 
 #### 1 Bedroom
+
+From $1,650,000
+
+Approx 885 sq ft
 
 10'+ ceiling.
 
@@ -274,7 +275,7 @@ LOCATION:
 
 Within walking distance of Trad Room, Winona’s, Brooklyn Botanic Garden, and Prospect Park, HOME0001’s Bed-Stuy location is also close to the A, C, G, J, M, and Z trains into Manhattan.
 
-Originally settled ~~by~~ the Dutch in the 17th century, Bed-Stuy’s name combines the hamlets of Bedford (named after a market village in England) and Stuyvesant Heights (named after Peter Stuyvesant, the last Governor of the Colony of New Netherland). Bed-Stuy evolved into a more densely residential neighborhood through the 19th and early 20th centuries and, in the mid-20th century, became a cultural and political home for New York’s African American communities and a hub for civil rights activism. Bed-Stuy has been a major hotbed for music since the 1910s, with early jazz pioneers and modern hip-hop artists hailing from the neighborhood.
+Originally settled by the Dutch in the 17th century, Bed-Stuy’s name combines the hamlets of Bedford (named after a market village in England) and Stuyvesant Heights (named after Peter Stuyvesant, the last Governor of the Colony of New Netherland). Bed-Stuy evolved into a more densely residential neighborhood through the 19th and early 20th centuries and, in the mid-20th century, became a cultural and political home for New York’s African American communities and a hub for civil rights activism. Bed-Stuy has been a major hotbed for music since the 1910s, with early jazz pioneers and modern hip-hop artists hailing from the neighborhood.
 
 BUILDING:
 
